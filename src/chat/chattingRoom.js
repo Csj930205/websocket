@@ -1,0 +1,109 @@
+import React, {useEffect, useRef, useState} from 'react';
+import {Stomp} from "@stomp/stompjs";
+import {useLocation} from "react-router-dom";
+import SockJs from 'sockjs-client';
+import './css/chat.css';
+
+function ChattingRoom() {
+    const location = useLocation();
+    const roomId = location.state.roomId;
+    const userName = location.state.userName;
+    const roomName = location.state.roomName;
+
+    const [enterLeave ,setEnterLeave] = useState([]);
+
+    const [messages, setMessages] = useState([]);
+    const [inputValue, setInputValue] = useState('');
+
+    const today = new Date();
+    const chatMessagesRef = useRef(null);
+
+    const client = useRef(null);
+
+    const handleInputValue = (e) => {setInputValue(e.target.value)}
+
+    useEffect(() => {
+        const webSocket = new SockJs('/ws');
+        client.current = Stomp.over(webSocket);
+        const cleanUp = () => {
+            client.current.disconnect();
+            webSocket.close();
+        };
+        if (!client.current.connected) {
+            client.current.connect({}, () => {
+                client.current.subscribe('/sub/chat/room/' + roomId, onMessageReceived)
+                client.current.send('/pub/chat/enterUser', {},
+                    JSON.stringify({
+                        roomId : roomId,
+                        sender : userName,
+                        messageType : 'ENTER',
+                        time : today.toISOString()
+                    })
+                );
+            });
+        }
+        return cleanUp;
+    }, [roomId, roomName])
+
+
+    useEffect(() => {
+        const chatMessageNode = chatMessagesRef.current;
+        chatMessageNode.scrollTop = chatMessageNode.scrollHeight - chatMessageNode.clientHeight
+    }, [messages]);
+
+    const onMessageReceived = (payload) => {
+        const chat = JSON.parse(payload.body);
+        if (chat.messageType === 'ENTER' || chat.messageType === 'LEAVE') {
+            setEnterLeave(chat.message);
+        }
+        if (chat.messageType === 'TALK') {
+            setMessages((prevMessages) => [...prevMessages, chat]);
+        }
+    }
+
+    const sendMessage = (e) => {
+        e.preventDefault();
+        if (inputValue.trim() === '') {
+            alert('메세지를 입력해 주세요.')
+            return;
+        }
+        if (!client.current.connected) {
+            alert('연결이 이루어지지 않았습니다.')
+            return;
+        }
+
+        const data = {
+            roomId : roomId,
+            sender : userName,
+            message : inputValue,
+            messageType: 'TALK',
+            time : today.toISOString()
+        }
+        client.current.send('/pub/chat/sendMessage', {}, JSON.stringify(data));
+        setInputValue('');
+    }
+    console.log(messages)
+    return (
+        <div className='chat-container'>
+            <h3 className='chat-roomName'>{roomName}</h3>
+            <div className="chat-messages" ref={chatMessagesRef}>
+                {messages.map((message, index) => (
+                    <div key={index} className={`chat-message ${message.sender === userName ? 'right' : 'left'}`}>
+                        <div className='chat-bubble'>
+                            <span className="chat-username">{message.sender}</span> : {" "}
+                            <span className="chat-message">{message.message}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <form onSubmit={sendMessage}>
+            <div className="chat-input">
+                <input type="text" value={inputValue} onChange={handleInputValue}/>
+                <button type={'submit'}>전송</button>
+            </div>
+            </form>
+        </div>
+    );
+}
+
+export default ChattingRoom;
