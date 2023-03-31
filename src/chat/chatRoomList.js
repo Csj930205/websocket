@@ -108,7 +108,7 @@ function ChatRoomList() {
     return (
         <div>
             <div>
-                채팅방 생성: <input type={'text'} value={roomName} onChange={handleRoomName}/>
+                채팅방 생성: <input type={'text'} value={roomName} onChange={handleRoomName}/>{" "}
                 <Button variant={'primary'} type={'button'} onClick={chattingRoomCreate}> 생성 </Button>
             </div>
             <br/>

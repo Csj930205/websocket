@@ -18,7 +18,8 @@ function ChattingRoom() {
     const client = useRef(null);
 
     const handleInputValue = (e) => {setInputValue(e.target.value)}
-    console.log(roomId)
+    console.log("roomId : " + roomId);
+
     /**
      * Stomp 연결 및 구독
      */
@@ -43,13 +44,18 @@ function ChattingRoom() {
             });
         }
         return cleanUp;
-    }, [roomId, roomName])
+    }, [roomId, roomName]);
 
     useEffect(() => {
         return () => {
             client.current.disconnect();
         };
-    },[])
+    },[]);
+
+    const close = () => {
+        client.current.disconnect();
+        window.location.href = "/chatRoomList"
+    }
 
     /**
      * Message
@@ -66,10 +72,12 @@ function ChattingRoom() {
     const onMessageReceived = (payload) => {
         const chat = JSON.parse(payload.body);
         if (chat.messageType === 'ENTER') {
-            setEnter(chat.message);
+            setEnter([])
+            setEnter((prevEnters) => [...prevEnters, chat.message]);
         }
         if (chat.messageType === 'LEAVE') {
-            setLeave(chat.message);
+            setLeave([])
+            setLeave((prevLeaves) => [...prevLeaves, chat.message]);
         }
         if (chat.messageType === 'TALK') {
             setMessages((prevMessages) => [...prevMessages, chat]);
@@ -105,29 +113,35 @@ function ChattingRoom() {
     return (
         <div className='chat-container'>
             <h3 className='chat-roomName'>{roomName}</h3>
+
             <div className="chat-messages" ref={chatMessagesRef}>
+                <div>
+                    {enter.map((message, index) => (
+                        <div key={`enter-${index}`}>
+                            {message}
+                        </div>
+                    ))}
+                </div>
+                {/*    {leave.map((message, index) => (*/}
+                {/*        <div key={`enter-${index}`}>*/}
+                {/*            {message}*/}
+                {/*        </div>*/}
+                {/*    ))}*/}
+                {/*</div>*/}
                 {messages.map((message, index) => (
                     <div key={index} className={`chat-message ${message.sender === userName ? 'right' : 'left'}`}>
                         <div className='chat-bubble'>
                             <span className="chat-username">{message.sender}</span> : {" "}
-                            <span className="chat-message">{message.message}</span>
+                            <span className="chat-message">{message.message}</span> {" "}
                         </div>
                     </div>
                 ))}
             </div>
-            {/*{enter ? (*/}
-            {/*    <div className="chat-enter-leave">*/}
-            {/*        {enter}*/}
-            {/*    </div>*/}
-            {/*) : (*/}
-            {/*    <div className="chat-enter-leave">*/}
-            {/*        {leave}*/}
-            {/*    </div>*/}
-            {/*)}*/}
             <form onSubmit={sendMessage}>
             <div className="chat-input">
                 <input type="text" value={inputValue} onChange={handleInputValue}/>
                 <button type={'submit'}>전송</button>
+                <button type={'button'} onClick={close}>나가기</button>
             </div>
             </form>
         </div>
