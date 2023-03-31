@@ -21,9 +21,9 @@ function ChatRoomList() {
          * 채팅방 리스트 Axios
          * @returns {Promise<void>}
          */
-        const chattingRoom = async () => {
+        const chattingRoom =  () => {
             const url = '/chat/chatlist'
-            await axios.get(url)
+            axios.get(url)
                 .then(function (res) {
                     if (res.data.code === 200) {
                         setChatRoomList(res.data.chatRoomList);
@@ -40,7 +40,7 @@ function ChatRoomList() {
      * 채팅방 생성 Axios
      * @returns {Promise<void>}
      */
-    const chattingRoomCreate = async () => {
+    const chattingRoomCreate = () => {
         const url = '/chat/createroom';
         const data = {roomName : roomName}
         const config = {"Content-Type" : 'application/json'}
@@ -48,7 +48,7 @@ function ChatRoomList() {
             alert('채팅방 이름을 입력해주세요.')
             return ;
         }
-        await axios.post(url, data, config)
+        axios.post(url, data, config)
             .then(function (res) {
                 if (res.data.code === 200) {
                     alert(res.data.message);
@@ -60,7 +60,7 @@ function ChatRoomList() {
             })
             .catch(error => console.log(error))
     }
-    const connect = () => {
+    const chattingRoomEnter = () => {
         if (userName === '') {
             alert('이름을 입력해주세요.')
             return;
@@ -72,11 +72,11 @@ function ChatRoomList() {
      * 닉네임 중복 Axios
      * @returns {Promise<void>}
      */
-    const isDuplicateName = async () => {
+    const isDuplicateName = () => {
         const url = '/chat/duplicateuser';
         const data = {userName : userName, roomId : roomId}
 
-        await axios.get(url, {params : data})
+        axios.get(url, {params : data})
             .then(function (res) {
                 if (res.data.code === 200) {
                     alert('사용가능한 닉네임 입니다.')
@@ -142,7 +142,7 @@ function ChatRoomList() {
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant={'danger'} type={'button'} onClick={modalHide}>닫기</Button>
-                        <Button type={'button'} onClick={connect}>확인</Button>
+                        <Button type={'button'} onClick={chattingRoomEnter}>확인</Button>
                     </Modal.Footer>
                 </Modal>
             </div>

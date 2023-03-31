@@ -9,19 +9,19 @@ function ChattingRoom() {
     const roomId = location.state.roomId;
     const userName = location.state.userName;
     const roomName = location.state.roomName;
-
-    const [enterLeave ,setEnterLeave] = useState([]);
-
+    const [enter ,setEnter] = useState([]);
+    const [leave, setLeave] = useState([]);
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
-
     const today = new Date();
     const chatMessagesRef = useRef(null);
-
     const client = useRef(null);
 
     const handleInputValue = (e) => {setInputValue(e.target.value)}
-
+    console.log(roomId)
+    /**
+     * Stomp 연결 및 구독
+     */
     useEffect(() => {
         const webSocket = new SockJs('/ws');
         client.current = Stomp.over(webSocket);
@@ -45,22 +45,41 @@ function ChattingRoom() {
         return cleanUp;
     }, [roomId, roomName])
 
+    useEffect(() => {
+        return () => {
+            client.current.disconnect();
+        };
+    },[])
 
+    /**
+     * Message
+     */
     useEffect(() => {
         const chatMessageNode = chatMessagesRef.current;
         chatMessageNode.scrollTop = chatMessageNode.scrollHeight - chatMessageNode.clientHeight
     }, [messages]);
 
+    /**
+     * 입장 또는 퇴장시 Message 저장
+     * @param payload
+     */
     const onMessageReceived = (payload) => {
         const chat = JSON.parse(payload.body);
-        if (chat.messageType === 'ENTER' || chat.messageType === 'LEAVE') {
-            setEnterLeave(chat.message);
+        if (chat.messageType === 'ENTER') {
+            setEnter(chat.message);
+        }
+        if (chat.messageType === 'LEAVE') {
+            setLeave(chat.message);
         }
         if (chat.messageType === 'TALK') {
             setMessages((prevMessages) => [...prevMessages, chat]);
         }
     }
 
+    /**
+     * WebSocket SendMessage
+     * @param e
+     */
     const sendMessage = (e) => {
         e.preventDefault();
         if (inputValue.trim() === '') {
@@ -68,10 +87,9 @@ function ChattingRoom() {
             return;
         }
         if (!client.current.connected) {
-            alert('연결이 이루어지지 않았습니다.')
+            alert('연결이 이루어지지 않았습니다. 잠시만 기다려 주세요.')
             return;
         }
-
         const data = {
             roomId : roomId,
             sender : userName,
@@ -82,7 +100,8 @@ function ChattingRoom() {
         client.current.send('/pub/chat/sendMessage', {}, JSON.stringify(data));
         setInputValue('');
     }
-    console.log(messages)
+    console.log(enter)
+    console.log(leave)
     return (
         <div className='chat-container'>
             <h3 className='chat-roomName'>{roomName}</h3>
@@ -96,6 +115,15 @@ function ChattingRoom() {
                     </div>
                 ))}
             </div>
+            {/*{enter ? (*/}
+            {/*    <div className="chat-enter-leave">*/}
+            {/*        {enter}*/}
+            {/*    </div>*/}
+            {/*) : (*/}
+            {/*    <div className="chat-enter-leave">*/}
+            {/*        {leave}*/}
+            {/*    </div>*/}
+            {/*)}*/}
             <form onSubmit={sendMessage}>
             <div className="chat-input">
                 <input type="text" value={inputValue} onChange={handleInputValue}/>
