@@ -114,24 +114,25 @@ public class ChatService {
     /**
      * 채팅방 userName 조회
      * @param roomId
-     * @param userUUID
      * @return
      */
-    public String getUserName(String roomId, String userUUID) {
+    public String getUserName(String roomId) {
         ChatRoom room = chatRoomMap.get(roomId);
-        return room.getUserList().get(userUUID);
+        String userName = room.getUserList().get("userUUID");
+
+        return userName;
     }
 
     /**
-     * 채팅방 userName 조회
+     * 채팅방 userList 조회
      * @param roomId
      * @return
      */
-    public List<String> getUserList(String roomId) {
-        List<String> list = new ArrayList<>();
+    public ArrayList<String> getUserList(String roomId) {
+        ArrayList<String> list = new ArrayList<>();
 
         ChatRoom room = chatRoomMap.get(roomId);
-        room.getUserList().forEach((key, value) -> list.add(value));
+        room.getUserList().forEach((key, value) -> { list.add(value);});
         return list;
     }
 }

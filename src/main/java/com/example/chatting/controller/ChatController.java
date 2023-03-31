@@ -12,6 +12,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 @Controller
 @RequiredArgsConstructor
@@ -57,7 +58,7 @@ public class ChatController {
      * @param event
      */
     @EventListener
-    public void webSocketDisconnectListener(SessionConnectedEvent event) {
+    public void webSocketDisconnectListener(SessionDisconnectEvent event) {
         log.info("DisConnEvent {}", event);
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
@@ -68,7 +69,7 @@ public class ChatController {
             log.info("headerAccessor {}", headerAccessor);
 
             chatService.minusUserCnt(roomId);
-            String userName = chatService.getUserName(roomId, userUUID);
+            String userName = chatService.getUserName(roomId);
             chatService.delUser(roomId, userUUID);
 
             if (userName != null) {
@@ -82,6 +83,7 @@ public class ChatController {
 
                 simpMessageSendingOperations.convertAndSend("/sub/chat/room/" + roomId, chat);
             }
+
         }
     }
 }
