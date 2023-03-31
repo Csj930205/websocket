@@ -22,9 +22,7 @@ public class ChatService {
      * @return
      */
     public List<ChatRoom> findAllRoom() {
-        // 채팅방 생성 순서를 최근순으로 반환
         List chatRooms = new ArrayList(chatRoomMap.values());
-
         return chatRooms;
     }
 
@@ -55,7 +53,9 @@ public class ChatService {
      */
     public void plusUserCnt(String roomId) {
         ChatRoom room = chatRoomMap.get(roomId);
-        room.setUserCount(room.getUserCount() + 1);
+        if (room != null) {
+            room.setUserCount(room.getUserCount() + 1);
+        }
     }
 
     /**
@@ -64,7 +64,9 @@ public class ChatService {
      */
     public void minusUserCnt(String roomId) {
         ChatRoom room = chatRoomMap.get(roomId);
-        room.setUserCount(room.getUserCount() - 1);
+        if (room != null && room.getUserCount() != 0) {
+            room.setUserCount(room.getUserCount() - 1);
+        }
     }
 
     /**
@@ -75,9 +77,11 @@ public class ChatService {
      */
     public String addUser(String roomId, String userName) {
         ChatRoom room = chatRoomMap.get(roomId);
+        if (room == null) {
+            throw new IllegalStateException("Invalid roomId");
+        }
         String userUUID = UUID.randomUUID().toString();
-
-        room.getUserList().put("userUUID", userName);
+        room.getUserList().put(userUUID, userName);
         return userUUID;
     }
 
@@ -116,10 +120,9 @@ public class ChatService {
      * @param roomId
      * @return
      */
-    public String getUserName(String roomId) {
+    public String getUserName(String roomId, String userUUID) {
         ChatRoom room = chatRoomMap.get(roomId);
-        String userName = room.getUserList().get("userUUID");
-
+        String userName = room.getUserList().get(userUUID);
         return userName;
     }
 

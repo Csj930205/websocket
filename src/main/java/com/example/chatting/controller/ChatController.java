@@ -11,7 +11,6 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 @Controller
@@ -33,10 +32,12 @@ public class ChatController {
     public void enterUser(@Payload ChatDto chatDto, SimpMessageHeaderAccessor simpMessageHeaderAccessor) {
         chatService.plusUserCnt(chatDto.getRoomId());
 
-        String userUUID = chatService.addUser(chatDto.getRoomId(), chatDto.getSender());
-        simpMessageHeaderAccessor.getSessionAttributes().put("userUUID", userUUID);
+        String userUUID = (String) simpMessageHeaderAccessor.getSessionAttributes().get("userUUID");
+        if (userUUID == null) {
+            userUUID = chatService.addUser(chatDto.getRoomId(), chatDto.getSender());
+            simpMessageHeaderAccessor.getSessionAttributes().put("userUUID", userUUID);
+        }
         simpMessageHeaderAccessor.getSessionAttributes().put("roomId", chatDto.getRoomId());
-
 
         chatDto.setMessage(chatDto.getSender() + " 님이 입장하셧습니다.");
         simpMessageSendingOperations.convertAndSend("/sub/chat/room/" + chatDto.getRoomId(), chatDto);
@@ -66,24 +67,24 @@ public class ChatController {
             String userUUID = (String) headerAccessor.getSessionAttributes().get("userUUID");
             String roomId = (String) headerAccessor.getSessionAttributes().get("roomId");
 
-            log.info("headerAccessor {}", headerAccessor);
+            if (userUUID != null && roomId !=null) {
+                log.info("headerAccessor {}", headerAccessor);
 
-            chatService.minusUserCnt(roomId);
-            String userName = chatService.getUserName(roomId);
-            chatService.delUser(roomId, userUUID);
+                chatService.minusUserCnt(roomId);
+                String userName = chatService.getUserName(roomId, userUUID);
+                chatService.delUser(roomId, userUUID);
 
-            if (userName != null) {
-                log.info("User DisConnected", userName);
+                if (userName != null) {
+                    log.info("User DisConnected", userName);
 
-                ChatDto chat = ChatDto.builder()
-                        .messageType(ChatDto.MessageType.LEAVE)
-                        .sender(userName)
-                        .message(userName + " 님 퇴장")
-                        .build();
-
-                simpMessageSendingOperations.convertAndSend("/sub/chat/room/" + roomId, chat);
+                    ChatDto chat = ChatDto.builder()
+                            .messageType(ChatDto.MessageType.LEAVE)
+                            .sender(userName)
+                            .message(userName + " 님 퇴장")
+                            .build();
+                    simpMessageSendingOperations.convertAndSend("/sub/chat/room/" + roomId, chat);
+                }
             }
-
         }
     }
 }
