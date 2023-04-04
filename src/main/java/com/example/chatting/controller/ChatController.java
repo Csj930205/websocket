@@ -51,6 +51,7 @@ public class ChatController {
     public void sendMessage(@Payload ChatDto chatDto) {
         log.info("Chat {}", chatDto);
         chatDto.setMessage(chatDto.getMessage());
+        chatService.addMessage(chatDto);
         simpMessageSendingOperations.convertAndSend("/sub/chat/room/" + chatDto.getRoomId(), chatDto);
     }
 

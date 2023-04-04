@@ -1,5 +1,6 @@
 package com.example.chatting.service;
 
+import com.example.chatting.domain.dto.ChatDto;
 import com.example.chatting.domain.dto.ChatRoom;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
@@ -83,6 +84,30 @@ public class ChatService {
         String userUUID = UUID.randomUUID().toString();
         room.getUserList().put(userUUID, userName);
         return userUUID;
+    }
+
+    /**
+     * 채팅방 메세지 저장
+     * @param chatDto
+     */
+    public void addMessage(ChatDto chatDto) {
+        ChatRoom room = chatRoomMap.get(chatDto.getRoomId());
+
+        if (room == null) {
+            throw new IllegalStateException();
+        }
+        room.addMessage(chatDto);
+    }
+
+    /**
+     * 채팅방 이전 메세지 리스트
+     * @param roomId
+     * @return
+     */
+    public List<ChatDto> messageList(String roomId) {
+        ChatRoom room = chatRoomMap.get(roomId);
+        List<ChatDto> messageList = room.getMessageList();
+        return messageList;
     }
 
     /**

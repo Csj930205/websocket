@@ -2,7 +2,9 @@ package com.example.chatting.domain.dto;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -21,11 +23,17 @@ public class ChatRoom {
 
     private HashMap<String, String> userList = new HashMap<>();
 
+    private List<ChatDto> messageList = new ArrayList<>();
+
     public ChatRoom create(String roomName) {
         ChatRoom room = new ChatRoom();
         room.roomId = UUID.randomUUID().toString();
         room.roomName = roomName;
 
         return room;
+    }
+
+    public void addMessage(ChatDto chatDto) {
+        messageList.add(chatDto);
     }
 }

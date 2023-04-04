@@ -1,5 +1,6 @@
 package com.example.chatting.controller;
 
+import com.example.chatting.domain.dto.ChatDto;
 import com.example.chatting.domain.dto.ChatRoom;
 import com.example.chatting.service.ChatService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,22 @@ public class ChatRoomController {
         result.put("result", "success");
         result.put("code", HttpStatus.OK.value());
         result.put("chatRoomList", chatRoomList);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    /**
+     * 채팅방 이전 메세지 조회
+     * @param roomId
+     * @return
+     */
+    @GetMapping("messageList")
+    public ResponseEntity<Map<String, Object>> chatRoomMessage(String roomId) {
+        List<ChatDto> messageList = chatService.messageList(roomId);
+        Map<String, Object> result = new HashMap<>();
+
+        result.put("result", "success");
+        result.put("code", HttpStatus.OK.value());
+        result.put("messageList", messageList);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
