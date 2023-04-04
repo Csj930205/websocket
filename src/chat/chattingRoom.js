@@ -3,6 +3,7 @@ import {Stomp} from "@stomp/stompjs";
 import {useLocation} from "react-router-dom";
 import SockJs from 'sockjs-client';
 import './css/chat.css';
+import axios from "axios";
 
 function ChattingRoom() {
     const location = useLocation();
@@ -16,9 +17,8 @@ function ChattingRoom() {
     const today = new Date();
     const chatMessagesRef = useRef(null);
     const client = useRef(null);
-
     const handleInputValue = (e) => {setInputValue(e.target.value)}
-    console.log("roomId : " + roomId);
+    const [messageList, setMessageList] = useState([]);
 
     /**
      * Stomp 연결 및 구독
@@ -47,11 +47,27 @@ function ChattingRoom() {
     }, [roomId, roomName]);
 
     useEffect(() => {
+        const url = '/chat/messageList';
+        const data = {roomId : roomId}
+        axios.get(url, {params: data} )
+            .then(function (res) {
+                if (res.data.code === 200) {
+                    setMessageList(res.data.messageList);
+                    console.log("messageList: " + messageList)
+                } else {
+                    return;
+                }
+            })
+            .catch(error => console.log(error));
+
         return () => {
             client.current.disconnect();
         };
     },[]);
 
+    /**
+     * 나가기버튼 클릭
+     */
     const close = () => {
         client.current.disconnect();
         window.location.href = "/chatRoomList"
@@ -83,6 +99,7 @@ function ChattingRoom() {
             setMessages((prevMessages) => [...prevMessages, chat]);
         }
     }
+    console.log(messages)
 
     /**
      * WebSocket SendMessage
@@ -108,8 +125,11 @@ function ChattingRoom() {
         client.current.send('/pub/chat/sendMessage', {}, JSON.stringify(data));
         setInputValue('');
     }
+
     console.log(enter)
     console.log(leave)
+    console.log(roomId);
+
     return (
         <div className='chat-container'>
             <h3 className='chat-roomName'>{roomName}</h3>
@@ -128,6 +148,14 @@ function ChattingRoom() {
                 {/*        </div>*/}
                 {/*    ))}*/}
                 {/*</div>*/}
+                {messageList?.map((messageList, index) => (
+                    <div key={index} className={`chat-message ${messageList.sender === userName ? 'right' : 'left'}`}>
+                        <div className='chat-bubble'>
+                            <span className="chat-username">{messageList.sender}</span> : {" "}
+                            <span className="chat-message">{messageList.message}</span> {" "}
+                        </div>
+                    </div>
+                    ))}
                 {messages.map((message, index) => (
                     <div key={index} className={`chat-message ${message.sender === userName ? 'right' : 'left'}`}>
                         <div className='chat-bubble'>
