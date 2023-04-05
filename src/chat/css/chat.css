@@ -103,3 +103,13 @@
     border-radius: 4px;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 }
+.userList button {
+    float: right;
+    background-color: #4CAF50;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+}

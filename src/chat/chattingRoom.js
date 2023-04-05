@@ -4,13 +4,14 @@ import {useLocation} from "react-router-dom";
 import SockJs from 'sockjs-client';
 import './css/chat.css';
 import axios from "axios";
+import {Modal} from "react-bootstrap";
 
 function ChattingRoom() {
     const location = useLocation();
     const roomId = location.state.roomId;
     const userName = location.state.userName;
     const [userList, setUserList] = useState([]);
-
+    const [isModal, setIsModal] = useState(false);
     const roomName = location.state.roomName;
     const [enter ,setEnter] = useState([]);
     const [leave, setLeave] = useState([]);
@@ -96,7 +97,7 @@ function ChattingRoom() {
         } else if (chat.messageType === 'LEAVE') {
             setLeave([])
             setLeave((prevLeaves) => [...prevLeaves, chat.message]);
-            setUserList((prevUserList) => prevUserList.filter(user => user !== chat.sender));
+            setUserList((prevUserList) => prevUserList.filter(user => user == chat.sender));
         } else if (chat.messageType === 'TALK') {
             setMessages((prevMessages) => [...prevMessages, chat]);
         }
@@ -127,6 +128,13 @@ function ChattingRoom() {
         client.current.send('/pub/chat/sendMessage', {}, JSON.stringify(data));
         setInputValue('');
     }
+    const openModal = (userList) => {
+        setIsModal(true);
+    }
+
+    const closedModal = () => {
+        setIsModal(false);
+    }
 
     console.log(enter)
     console.log(leave)
@@ -135,8 +143,10 @@ function ChattingRoom() {
     return (
         <div className='chat-container'>
             <h3 className='chat-roomName'>{roomName}</h3>
-
             <div className="chat-messages" ref={chatMessagesRef}>
+                <div className="userList">
+                    <button type='button'onClick={openModal}>--</button>
+                </div>
                 <div>
                     {enter.map((message, index) => (
                         <div key={`enter-${index}`}>
@@ -174,6 +184,18 @@ function ChattingRoom() {
                 <button className="closeButton" type={'button'} onClick={close}>나가기</button>
             </div>
             </form>
+            <div>
+                <Modal show={isModal} onHide={closedModal}>
+                    <Modal.Header>
+                        <Modal.Title>채팅방 유저</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {userList.map((user, index) => (
+                            <div key={index}>{user}</div>
+                        ))}
+                    </Modal.Body>
+                </Modal>
+            </div>
         </div>
     );
 }
