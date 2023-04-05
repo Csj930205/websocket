@@ -7,12 +7,10 @@ import {useNavigate} from "react-router-dom";
 function ChatRoomList() {
     const [roomId, setRoomId] = useState('');
     const [roomName, setRoomName] = useState('')
-    const [userCount, setUserCont] = useState('');
     const [chatRoomList, setChatRoomList] = useState([]);
     const [userName, setUserName] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const navigate = useNavigate();
-
     const handleRoomName = (e) => {setRoomName(e.target.value)}
     const handleUserName = (e) => {setUserName(e.target.value)}
 
@@ -60,6 +58,10 @@ function ChatRoomList() {
             })
             .catch(error => console.log(error))
     }
+
+    /**
+     * 채팅룸 입장 시 닉네임 중복검사
+     */
     const chattingRoomEnter = () => {
         if (userName === '') {
             alert('이름을 입력해주세요.')

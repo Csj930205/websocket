@@ -9,6 +9,8 @@ function ChattingRoom() {
     const location = useLocation();
     const roomId = location.state.roomId;
     const userName = location.state.userName;
+    const [userList, setUserList] = useState([]);
+
     const roomName = location.state.roomName;
     const [enter ,setEnter] = useState([]);
     const [leave, setLeave] = useState([]);
@@ -20,6 +22,7 @@ function ChattingRoom() {
     const handleInputValue = (e) => {setInputValue(e.target.value)}
     const [messageList, setMessageList] = useState([]);
 
+    console.log("userList :" + userList);
     /**
      * Stomp 연결 및 구독
      */
@@ -59,7 +62,6 @@ function ChattingRoom() {
                 }
             })
             .catch(error => console.log(error));
-
         return () => {
             client.current.disconnect();
         };
@@ -90,12 +92,12 @@ function ChattingRoom() {
         if (chat.messageType === 'ENTER') {
             setEnter([])
             setEnter((prevEnters) => [...prevEnters, chat.message]);
-        }
-        if (chat.messageType === 'LEAVE') {
+            setUserList((prevUserList) => [...prevUserList, chat.sender]);
+        } else if (chat.messageType === 'LEAVE') {
             setLeave([])
             setLeave((prevLeaves) => [...prevLeaves, chat.message]);
-        }
-        if (chat.messageType === 'TALK') {
+            setUserList((prevUserList) => prevUserList.filter(user => user !== chat.sender));
+        } else if (chat.messageType === 'TALK') {
             setMessages((prevMessages) => [...prevMessages, chat]);
         }
     }
