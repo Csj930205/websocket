@@ -168,8 +168,8 @@ function ChattingRoom() {
             <form onSubmit={sendMessage}>
             <div className="chat-input">
                 <input type="text" value={inputValue} onChange={handleInputValue}/>
-                <button type={'submit'}>전송</button>
-                <button type={'button'} onClick={close}>나가기</button>
+                <button className="submitButton" type={'submit'}>전송</button>
+                <button className="closeButton" type={'button'} onClick={close}>나가기</button>
             </div>
             </form>
         </div>

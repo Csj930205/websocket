@@ -9,7 +9,7 @@ function Header() {
                 <Nav.Link as={Link} to={'/'}> 홈 </Nav.Link>
             </Nav.Item>
             <Nav.Item>
-                <Nav.Link as={Link} to={'/chatRoomList'}> 채팅방 리스트 </Nav.Link>
+                <Nav.Link as={Link} to={'/chatRoomList'}> 채팅방 </Nav.Link>
             </Nav.Item>
         </Nav>
     );
