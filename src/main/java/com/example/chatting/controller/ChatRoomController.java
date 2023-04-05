@@ -71,23 +71,6 @@ public class ChatRoomController {
     }
 
     /**
-     * 채팅방 입장
-     * @param roomId
-     * @return
-     */
-    @GetMapping("room")
-    public ResponseEntity<Map<String, Object>> roomEnter(String roomId) {
-        ChatRoom roomEnter = chatService.findRoomById(roomId);
-        log.info("입장 {}", roomId);
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("result", "success");
-        result.put("code", HttpStatus.OK.value());
-        result.put("roomEnter", roomEnter);
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
-    /**
      * 유저리스트 반환
      * @param roomId
      * @return
