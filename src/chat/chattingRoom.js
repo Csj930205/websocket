@@ -4,7 +4,7 @@ import {useLocation} from "react-router-dom";
 import SockJs from 'sockjs-client';
 import './css/chat.css';
 import axios from "axios";
-import {Modal} from "react-bootstrap";
+import {Button, Modal} from "react-bootstrap";
 
 function ChattingRoom() {
     const location = useLocation();
@@ -194,6 +194,9 @@ function ChattingRoom() {
                             <div key={index}>{user}</div>
                         ))}
                     </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant={"danger"} type='button' onClick={closedModal}>닫기</Button>
+                    </Modal.Footer>
                 </Modal>
             </div>
         </div>
