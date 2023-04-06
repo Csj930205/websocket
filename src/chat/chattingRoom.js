@@ -23,7 +23,6 @@ function ChattingRoom() {
     const handleInputValue = (e) => {setInputValue(e.target.value)}
     const [messageList, setMessageList] = useState([]);
 
-    console.log("userList :" + userList);
     /**
      * Stomp 연결 및 구독
      */
@@ -63,9 +62,6 @@ function ChattingRoom() {
                 }
             })
             .catch(error => console.log(error));
-        return () => {
-            client.current.disconnect();
-        };
     },[]);
 
     /**
@@ -93,11 +89,9 @@ function ChattingRoom() {
         if (chat.messageType === 'ENTER') {
             setEnter([])
             setEnter((prevEnters) => [...prevEnters, chat.message]);
-            setUserList((prevUserList) => [...prevUserList, chat.sender]);
         } else if (chat.messageType === 'LEAVE') {
             setLeave([])
             setLeave((prevLeaves) => [...prevLeaves, chat.message]);
-            setUserList((prevUserList) => prevUserList.filter(user => user == chat.sender));
         } else if (chat.messageType === 'TALK') {
             setMessages((prevMessages) => [...prevMessages, chat]);
         }
@@ -128,8 +122,22 @@ function ChattingRoom() {
         client.current.send('/pub/chat/sendMessage', {}, JSON.stringify(data));
         setInputValue('');
     }
-    const openModal = (userList) => {
-        setIsModal(true);
+
+    /**
+     * modal open 시 유저리스트 반환
+     */
+    const openModal = () => {
+        const url = '/chat/userlist';
+        const data = {roomId : roomId}
+        axios.get(url, {params : data})
+            .then(function (res) {
+                if (res.data.code === 200) {
+                    setUserList(res.data.userList);
+                    setIsModal(true);
+                    console.log("userList" + userList)
+                }
+            })
+            .catch(error => console.log(error));
     }
 
     const closedModal = () => {
@@ -191,7 +199,9 @@ function ChattingRoom() {
                     </Modal.Header>
                     <Modal.Body>
                         {userList.map((user, index) => (
-                            <div key={index}>{user}</div>
+                            <div key={index}>
+                                <span>{user}</span>
+                            </div>
                         ))}
                     </Modal.Body>
                     <Modal.Footer>
